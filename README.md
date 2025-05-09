@@ -9,7 +9,7 @@ This project demonstrates a complete CI/CD pipeline using AWS CDK, CodePipeline,
 
 ## Application
 
-The application is a simple Flask web server that returns "Hello AMA" when accessed.
+The application is a simple Flask web server that returns "Hello, Demo for Codepipeline CDK Deployment created with Q Developer" when accessed.
 
 
 
