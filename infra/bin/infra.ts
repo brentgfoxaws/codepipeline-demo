@@ -4,10 +4,10 @@ import * as cdk from 'aws-cdk-lib';
 import { InfraStack } from '../lib/infra-stack';
 
 const app = new cdk.App();
-new InfraStack(app, 'AmaCodePipelineStack', {
+new InfraStack(app, 'CodepipelineDemoStack', {
   env: { 
     account: process.env.CDK_DEFAULT_ACCOUNT, 
     region: process.env.CDK_DEFAULT_REGION 
   },
-  description: 'AMA Demo Application with CodePipeline, ECR, Fargate, and API Gateway',
+  description: 'CodePipeline Demo Application with CodePipeline, ECR, Fargate, and API Gateway',
 });

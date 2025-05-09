@@ -16,36 +16,36 @@ export class InfraStack extends cdk.Stack {
     super(scope, id, props);
 
     // ECR Repository
-    const ecrRepo = new ecr.Repository(this, 'AmaEcrRepo', {
-      repositoryName: 'ama-demo',
+    const ecrRepo = new ecr.Repository(this, 'CodepipelineDemoEcrRepo', {
+      repositoryName: 'codepipeline-demo',
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       emptyOnDelete: true, // Using emptyOnDelete instead of deprecated autoDeleteImages
     });
 
     // VPC for Fargate
-    const vpc = new ec2.Vpc(this, 'AmaVpc', {
+    const vpc = new ec2.Vpc(this, 'CodepipelineDemoVpc', {
       maxAzs: 2,
       natGateways: 1,
     });
 
     // ECS Cluster
-    const cluster = new ecs.Cluster(this, 'AmaCluster', {
+    const cluster = new ecs.Cluster(this, 'CodepipelineDemoCluster', {
       vpc,
-      clusterName: 'ama-cluster',
+      clusterName: 'codepipeline-demo-cluster',
     });
 
     // Task Definition
-    const taskDefinition = new ecs.FargateTaskDefinition(this, 'AmaTaskDef', {
+    const taskDefinition = new ecs.FargateTaskDefinition(this, 'CodepipelineDemoTaskDef', {
       memoryLimitMiB: 512,
       cpu: 256,
     });
 
     // Add container to task definition
-    const containerName = 'ama-demo';
+    const containerName = 'codepipeline-demo';
     const container = taskDefinition.addContainer(containerName, {
       image: ecs.ContainerImage.fromEcrRepository(ecrRepo),
       logging: ecs.LogDrivers.awsLogs({
-        streamPrefix: 'ama-demo',
+        streamPrefix: 'codepipeline-demo',
         logRetention: logs.RetentionDays.ONE_WEEK,
       }),
       portMappings: [{ containerPort: 8080 }],
@@ -68,7 +68,7 @@ export class InfraStack extends cdk.Stack {
     serviceSecurityGroup.addIngressRule(lbSecurityGroup, ec2.Port.tcp(8080), 'Allow traffic from LB');
 
     // Create a Network Load Balancer (required for VPC Link)
-    const lb = new elbv2.NetworkLoadBalancer(this, 'AmaLoadBalancer', {
+    const lb = new elbv2.NetworkLoadBalancer(this, 'CodepipelineDemoLoadBalancer', {
       vpc,
       internetFacing: true,
     });
@@ -79,12 +79,12 @@ export class InfraStack extends cdk.Stack {
     });
 
     // Fargate Service
-    const fargateService = new ecs.FargateService(this, 'AmaService', {
+    const fargateService = new ecs.FargateService(this, 'CodepipelineDemoService', {
       cluster,
       taskDefinition,
       desiredCount: 1,
       assignPublicIp: false, // Using private subnets with NAT gateway
-      serviceName: 'ama-service',
+      serviceName: 'codepipeline-demo-service',
       securityGroups: [serviceSecurityGroup],
     });
 
@@ -101,16 +101,16 @@ export class InfraStack extends cdk.Stack {
     });
 
     // API Gateway
-    const api = new apigateway.RestApi(this, 'AmaGateway', {
-      restApiName: 'ama-gateway1',
-      description: 'API Gateway for AMA Demo',
+    const api = new apigateway.RestApi(this, 'CodepipelineDemoGateway', {
+      restApiName: 'codepipeline-demo-gateway',
+      description: 'API Gateway for CodePipeline Demo',
       deployOptions: {
         stageName: 'prod',
       },
     });
 
     // Create a VPC Link for API Gateway to access the Network Load Balancer
-    const vpcLink = new apigateway.VpcLink(this, 'AmaVpcLink', {
+    const vpcLink = new apigateway.VpcLink(this, 'CodepipelineDemoVpcLink', {
       targets: [lb],
     });
 
@@ -129,8 +129,8 @@ export class InfraStack extends cdk.Stack {
     api.root.addMethod('ANY', integration);
 
     // CodeBuild Project
-    const buildProject = new codebuild.PipelineProject(this, 'AmaBuildProject', {
-      projectName: 'ama-build',
+    const buildProject = new codebuild.PipelineProject(this, 'CodepipelineDemoBuildProject', {
+      projectName: 'codepipeline-demo-build',
       environment: {
         buildImage: codebuild.LinuxBuildImage.AMAZON_LINUX_2_3,
         privileged: true, // Required for Docker builds
@@ -168,7 +168,7 @@ export class InfraStack extends cdk.Stack {
               'docker push $REPOSITORY_URI:latest',
               'docker push $REPOSITORY_URI:$IMAGE_TAG',
               'echo Writing image definitions file...',
-              'aws ecs update-service --cluster ama-cluster --service ama-service --force-new-deployment',
+              'aws ecs update-service --cluster codepipeline-demo-cluster --service codepipeline-demo-service --force-new-deployment',
             ],
           },
         },
@@ -186,8 +186,8 @@ export class InfraStack extends cdk.Stack {
     const sourceOutput = new codepipeline.Artifact();
     const buildOutput = new codepipeline.Artifact();
 
-    const pipeline = new codepipeline.Pipeline(this, 'AmaPipeline', {
-      pipelineName: 'ama-pipeline',
+    const pipeline = new codepipeline.Pipeline(this, 'CodepipelineDemoPipeline', {
+      pipelineName: 'codepipeline-demo-pipeline',
       restartExecutionOnUpdate: true,
     });
 
@@ -198,7 +198,7 @@ export class InfraStack extends cdk.Stack {
         new codepipeline_actions.CodeStarConnectionsSourceAction({
           actionName: 'GitHub_Source',
           owner: 'brentgfoxaws',
-          repo: 'ama-codepipeline',
+          repo: 'codepipeline-demo',
           branch: 'main',
           connectionArn: 'arn:aws:codeconnections:ca-central-1:582828318008:connection/adbb8f63-cfe1-43de-b7c2-05ecf23e21b7',
           output: sourceOutput,
