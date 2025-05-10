@@ -4,7 +4,6 @@ import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as iam from 'aws-cdk-lib/aws-iam';
-import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import * as codepipeline from 'aws-cdk-lib/aws-codepipeline';
 import * as codepipeline_actions from 'aws-cdk-lib/aws-codepipeline-actions';
@@ -51,13 +50,13 @@ export class InfraStack extends cdk.Stack {
       portMappings: [{ containerPort: 8080 }],
     });
 
-    // Create a security group for the load balancer
-    const lbSecurityGroup = new ec2.SecurityGroup(this, 'LBSecurityGroup', {
+    // Create a security group for the Application Load Balancer
+    const albSecurityGroup = new ec2.SecurityGroup(this, 'AlbSecurityGroup', {
       vpc,
-      description: 'Security group for the load balancer',
+      description: 'Security group for the Application Load Balancer',
       allowAllOutbound: true,
     });
-    lbSecurityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'Allow HTTP traffic');
+    albSecurityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'Allow HTTP traffic from internet');
 
     // Create a security group for the Fargate service
     const serviceSecurityGroup = new ec2.SecurityGroup(this, 'ServiceSecurityGroup', {
@@ -65,18 +64,19 @@ export class InfraStack extends cdk.Stack {
       description: 'Security group for the Fargate service',
       allowAllOutbound: true,
     });
-    serviceSecurityGroup.addIngressRule(lbSecurityGroup, ec2.Port.tcp(8080), 'Allow traffic from LB');
+    serviceSecurityGroup.addIngressRule(albSecurityGroup, ec2.Port.tcp(8080), 'Allow traffic from ALB on port 8080 only');
 
-    // Create an Application Load Balancer with security group
+    // Create an Application Load Balancer
     const lb = new elbv2.ApplicationLoadBalancer(this, 'CodepipelineDemoLoadBalancer', {
       vpc,
       internetFacing: true,
-      securityGroup: lbSecurityGroup,
+      securityGroup: albSecurityGroup,
     });
 
     // Add a listener to the load balancer
     const listener = lb.addListener('Listener', {
       port: 80,
+      open: true,
     });
 
     // Fargate Service
@@ -104,33 +104,7 @@ export class InfraStack extends cdk.Stack {
       },
     });
 
-    // API Gateway
-    const api = new apigateway.RestApi(this, 'CodepipelineDemoGateway', {
-      restApiName: 'codepipeline-demo-gateway',
-      description: 'API Gateway for CodePipeline Demo',
-      deployOptions: {
-        stageName: 'prod',
-      },
-    });
-
-    // Create a VPC Link for API Gateway to access the Application Load Balancer
-    const vpcLink = new apigateway.VpcLink(this, 'CodepipelineDemoVpcLink', {
-      targets: [lb],
-    });
-
-    // Integration between API Gateway and ALB
-    const integration = new apigateway.Integration({
-      type: apigateway.IntegrationType.HTTP_PROXY,
-      integrationHttpMethod: 'ANY',
-      uri: `http://${lb.loadBalancerDnsName}/`,
-      options: {
-        connectionType: apigateway.ConnectionType.VPC_LINK,
-        vpcLink,
-      },
-    });
-
-    // Add root resource with ANY method
-    api.root.addMethod('ANY', integration);
+    // No API Gateway or VPC Link needed - the ALB will directly expose the service
 
     // CodeBuild Project
     const buildProject = new codebuild.PipelineProject(this, 'CodepipelineDemoBuildProject', {
@@ -224,14 +198,9 @@ export class InfraStack extends cdk.Stack {
     });
 
     // Outputs
-    new cdk.CfnOutput(this, 'ApiGatewayUrl', {
-      value: api.url,
-      description: 'URL of the API Gateway',
-    });
-
-    new cdk.CfnOutput(this, 'LoadBalancerDns', {
-      value: lb.loadBalancerDnsName,
-      description: 'DNS Name of the Load Balancer',
+    new cdk.CfnOutput(this, 'ApplicationUrl', {
+      value: `http://${lb.loadBalancerDnsName}`,
+      description: 'URL of the Application',
     });
 
     new cdk.CfnOutput(this, 'EcrRepositoryUri', {
