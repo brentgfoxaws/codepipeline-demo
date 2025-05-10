@@ -94,9 +94,12 @@ export class InfraStack extends cdk.Stack {
       targets: [fargateService],
       healthCheck: {
         enabled: true,
+        path: '/health',
+        protocol: elbv2.Protocol.HTTP,
         healthyThresholdCount: 2,
         unhealthyThresholdCount: 2,
-        interval: cdk.Duration.seconds(10),
+        interval: cdk.Duration.seconds(30),
+        timeout: cdk.Duration.seconds(5),
       },
     });
 
