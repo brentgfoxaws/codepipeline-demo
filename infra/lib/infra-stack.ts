@@ -13,6 +13,9 @@ import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 export class InfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+    
+    // Add a Name tag to all resources in this stack
+    cdk.Tags.of(this).add('Name', 'codepipeline-demo');
 
     // ECR Repository
     const ecrRepo = new ecr.Repository(this, 'CodepipelineDemoEcrRepo', {
