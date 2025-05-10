@@ -1,3 +1,12 @@
 /infra/node_modules
 /infra/node_modules-x
 /infra/cdk.out/
+.DS_Store
+*.log
+config.json
+.idea
+.envrc
+.vscode
+venv
+.swp
+find

@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello():
-    return 'Hello, This is a demo for Codepipeline CDK Deployment that I created with Q Developer on 09-MAY-25.'
+    return 'Hello, This is a demo for Codepipeline CDK Deployment that I created with Q Developer on 09-MAY-25.\n'
 
 @app.route('/health')
 def health():
