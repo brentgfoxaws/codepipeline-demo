@@ -67,10 +67,11 @@ export class InfraStack extends cdk.Stack {
     });
     serviceSecurityGroup.addIngressRule(lbSecurityGroup, ec2.Port.tcp(8080), 'Allow traffic from LB');
 
-    // Create a Network Load Balancer (required for VPC Link)
-    const lb = new elbv2.NetworkLoadBalancer(this, 'CodepipelineDemoLoadBalancer', {
+    // Create an Application Load Balancer with security group
+    const lb = new elbv2.ApplicationLoadBalancer(this, 'CodepipelineDemoLoadBalancer', {
       vpc,
       internetFacing: true,
+      securityGroup: lbSecurityGroup,
     });
 
     // Add a listener to the load balancer
@@ -112,12 +113,12 @@ export class InfraStack extends cdk.Stack {
       },
     });
 
-    // Create a VPC Link for API Gateway to access the Network Load Balancer
+    // Create a VPC Link for API Gateway to access the Application Load Balancer
     const vpcLink = new apigateway.VpcLink(this, 'CodepipelineDemoVpcLink', {
       targets: [lb],
     });
 
-    // Integration between API Gateway and NLB
+    // Integration between API Gateway and ALB
     const integration = new apigateway.Integration({
       type: apigateway.IntegrationType.HTTP_PROXY,
       integrationHttpMethod: 'ANY',
