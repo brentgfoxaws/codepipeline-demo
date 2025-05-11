@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.githubConfig = void 0;
+exports.githubConfig = {
+    owner: 'brentgfoxaws',
+    repo: 'codepipeline-demo',
+    branch: 'main',
+    connectionArn: 'arn:aws:codeconnections:ca-central-1:582828318008:connection/adbb8f63-cfe1-43de-b7c2-05ecf23e21b7',
+};
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29uZmlnLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiY29uZmlnLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7OztBQU9hLFFBQUEsWUFBWSxHQUFpQjtJQUN4QyxLQUFLLEVBQUUsY0FBYztJQUNyQixJQUFJLEVBQUUsbUJBQW1CO0lBQ3pCLE1BQU0sRUFBRSxNQUFNO0lBQ2QsYUFBYSxFQUFFLG1HQUFtRztDQUNuSCxDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiZXhwb3J0IGludGVyZmFjZSBHaXRIdWJDb25maWcge1xuICBvd25lcjogc3RyaW5nO1xuICByZXBvOiBzdHJpbmc7XG4gIGJyYW5jaDogc3RyaW5nO1xuICBjb25uZWN0aW9uQXJuOiBzdHJpbmc7XG59XG5cbmV4cG9ydCBjb25zdCBnaXRodWJDb25maWc6IEdpdEh1YkNvbmZpZyA9IHtcbiAgb3duZXI6ICdicmVudGdmb3hhd3MnLFxuICByZXBvOiAnY29kZXBpcGVsaW5lLWRlbW8nLFxuICBicmFuY2g6ICdtYWluJyxcbiAgY29ubmVjdGlvbkFybjogJ2Fybjphd3M6Y29kZWNvbm5lY3Rpb25zOmNhLWNlbnRyYWwtMTo1ODI4MjgzMTgwMDg6Y29ubmVjdGlvbi9hZGJiOGY2My1jZmUxLTQzZGUtYjdjMi0wNWVjZjIzZTIxYjcnLFxufTsiXX0=

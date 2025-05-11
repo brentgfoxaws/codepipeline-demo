@@ -9,6 +9,7 @@ import * as codepipeline from 'aws-cdk-lib/aws-codepipeline';
 import * as codepipeline_actions from 'aws-cdk-lib/aws-codepipeline-actions';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { githubConfig } from './config';
 
 export class InfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -178,10 +179,10 @@ export class InfraStack extends cdk.Stack {
       actions: [
         new codepipeline_actions.CodeStarConnectionsSourceAction({
           actionName: 'GitHub_Source',
-          owner: 'brentgfoxaws',
-          repo: 'codepipeline-demo',
-          branch: 'main',
-          connectionArn: 'arn:aws:codeconnections:ca-central-1:582828318008:connection/adbb8f63-cfe1-43de-b7c2-05ecf23e21b7',
+          owner: githubConfig.owner,
+          repo: githubConfig.repo,
+          branch: githubConfig.branch,
+          connectionArn: githubConfig.connectionArn,
           output: sourceOutput,
         }),
       ],
