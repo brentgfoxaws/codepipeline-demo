@@ -66,7 +66,7 @@ export class PipelineStack extends cdk.Stack {
               'docker push $REPOSITORY_URI:latest',
               'docker push $REPOSITORY_URI:$IMAGE_TAG',
               'echo Creating repository in app region if it does not exist...',
-              'aws ecr describe-repositories --repository-names codepipeline-demo --region ' + regionConfig.appRegion + ' || aws ecr create-repository --repository-name codepipeline-demo --region ' + regionConfig.appRegion,
+              'aws ecr create-repository --repository-name codepipeline-demo --region ' + regionConfig.appRegion + ' || true',
               'echo Pushing the Docker image to app region...',
               'APP_REPO=$(echo $REPOSITORY_URI | sed "s/' + regionConfig.pipelineRegion + '/' + regionConfig.appRegion + '/g")',
               'aws ecr get-login-password --region ' + regionConfig.appRegion + ' | docker login --username AWS --password-stdin $APP_REPO',
@@ -92,25 +92,27 @@ export class PipelineStack extends cdk.Stack {
     // Add cross-region permissions for ECR and ECS
     buildProject.addToRolePolicy(new iam.PolicyStatement({
       actions: [
-        'ecr:GetAuthorizationToken',
-        'ecr:BatchCheckLayerAvailability',
-        'ecr:GetDownloadUrlForLayer',
-        'ecr:BatchGetImage',
-        'ecr:InitiateLayerUpload',
-        'ecr:UploadLayerPart',
-        'ecr:CompleteLayerUpload',
-        'ecr:PutImage'
+        'ecr:GetAuthorizationToken'
       ],
       resources: ['*'],
     }));
     
-    // Add permissions to create ECR repository in the app region
+    // Add comprehensive ECR permissions for the app region
     buildProject.addToRolePolicy(new iam.PolicyStatement({
       actions: [
+        'ecr:BatchCheckLayerAvailability',
+        'ecr:BatchGetImage',
+        'ecr:CompleteLayerUpload',
         'ecr:CreateRepository',
-        'ecr:PutLifecyclePolicy'
+        'ecr:DescribeImages',
+        'ecr:DescribeRepositories',
+        'ecr:GetDownloadUrlForLayer',
+        'ecr:InitiateLayerUpload',
+        'ecr:PutImage',
+        'ecr:PutLifecyclePolicy',
+        'ecr:UploadLayerPart'
       ],
-      resources: ['arn:aws:ecr:' + regionConfig.appRegion + ':' + regionConfig.accountId + ':repository/codepipeline-demo'],
+      resources: ['arn:aws:ecr:' + regionConfig.appRegion + ':' + regionConfig.accountId + ':repository/*'],
     }));
 
     // CodePipeline
