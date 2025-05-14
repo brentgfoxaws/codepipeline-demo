@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello():
-    return 'Hello, This is a demo for deployment, now running in YYC that I created with Q Developer on 13-MAY-25 (orginally from 09-MAY-25).\n'
+    return 'Hello, This is a demo for my friends waiting for the Oilers game, now running in YYC that I created with Q Developer on 13-MAY-25 (orginally from 09-MAY-25).\n'
 
 @app.route('/health')
 def health():
